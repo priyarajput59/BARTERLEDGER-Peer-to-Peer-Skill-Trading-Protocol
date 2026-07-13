@@ -5,6 +5,7 @@ on:
     branches: [main, develop]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 env:
   CARGO_TERM_COLOR: always
@@ -38,8 +39,11 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('contracts/Cargo.lock') }}
           restore-keys: ${{ runner.os }}-cargo-
 
-      - name: Install Soroban CLI
-        run: cargo install --locked soroban-cli --features opt 2>/dev/null || true
+      - name: Install cargo-binstall
+        run: curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
+
+      - name: Install Stellar CLI
+        run: cargo binstall --no-confirm stellar-cli
 
       - name: Check formatting
         run: cargo fmt --all -- --check
@@ -60,10 +64,10 @@ jobs:
 
       - name: Optimize WASM
         run: |
-          soroban contract optimize \
+          stellar contract optimize \
             --wasm target/wasm32-unknown-unknown/release/trade_vault.wasm \
             --wasm-out target/wasm32-unknown-unknown/release/trade_vault.optimized.wasm
-          soroban contract optimize \
+          stellar contract optimize \
             --wasm target/wasm32-unknown-unknown/release/reputation_ledger.wasm \
             --wasm-out target/wasm32-unknown-unknown/release/reputation_ledger.optimized.wasm
 
@@ -137,25 +141,28 @@ jobs:
           name: wasm-contracts
           path: contracts/target/wasm32-unknown-unknown/release/
 
-      - name: Install Soroban CLI
-        run: cargo install --locked soroban-cli --features opt 2>/dev/null || true
+      - name: Install cargo-binstall
+        run: curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
+
+      - name: Install Stellar CLI
+        run: cargo binstall --no-confirm stellar-cli
 
       - name: Configure network
         run: |
-          soroban network add \
+          stellar network add \
             --rpc-url https://soroban-testnet.stellar.org \
             --network-passphrase "Test SDF Network ; September 2015" \
             testnet || true
 
       - name: Fund deployer
         run: |
-          soroban keys generate deployer --network testnet 2>/dev/null || true
-          curl -s "https://friendbot.stellar.org?addr=$(soroban keys address deployer)" | jq .
+          stellar keys generate deployer --network testnet 2>/dev/null || true
+          curl -s "https://friendbot.stellar.org?addr=$(stellar keys address deployer)" | jq .
 
       - name: Deploy TradeVault
         id: deploy-vault
         run: |
-          VAULT_ID=$(soroban contract deploy \
+          VAULT_ID=$(stellar contract deploy \
             --wasm target/wasm32-unknown-unknown/release/trade_vault.optimized.wasm \
             --source deployer --network testnet)
           echo "VAULT_ID=$VAULT_ID" >> $GITHUB_OUTPUT
@@ -164,7 +171,7 @@ jobs:
       - name: Deploy ReputationLedger
         id: deploy-ledger
         run: |
-          LEDGER_ID=$(soroban contract deploy \
+          LEDGER_ID=$(stellar contract deploy \
             --wasm target/wasm32-unknown-unknown/release/reputation_ledger.optimized.wasm \
             --source deployer --network testnet)
           echo "LEDGER_ID=$LEDGER_ID" >> $GITHUB_OUTPUT
@@ -173,25 +180,24 @@ jobs:
       - name: Deploy token (native wrapped XLM)
         id: deploy-token
         run: |
-          DEPLOYER=$(soroban keys address deployer)
-          TOKEN_ID=$(soroban contract deploy \
-            --wasm target/wasm32-unknown-unknown/release/trade_vault.optimized.wasm \
-            --source deployer --network testnet) || TOKEN_ID="native"
-          echo "TOKEN_ID=$DEPLOYER" >> $GITHUB_OUTPUT
+          TOKEN_ID=$(stellar contract id asset --asset native --network testnet)
+          echo "TOKEN_ID=$TOKEN_ID" >> $GITHUB_OUTPUT
+          echo "Native Token ID is: $TOKEN_ID"
 
       - name: Initialize contracts
         run: |
-          DEPLOYER=$(soroban keys address deployer)
+          DEPLOYER=$(stellar keys address deployer)
           VAULT_ID="${{ steps.deploy-vault.outputs.VAULT_ID }}"
           LEDGER_ID="${{ steps.deploy-ledger.outputs.LEDGER_ID }}"
+          TOKEN_ID="${{ steps.deploy-token.outputs.TOKEN_ID }}"
 
-          soroban contract invoke --id "$LEDGER_ID" --source deployer --network testnet \
+          stellar contract invoke --id "$LEDGER_ID" --source deployer --network testnet \
             -- initialize --admin "$DEPLOYER" --vault_address "$VAULT_ID"
 
-          soroban contract invoke --id "$VAULT_ID" --source deployer --network testnet \
+          stellar contract invoke --id "$VAULT_ID" --source deployer --network testnet \
             -- initialize --admin "$DEPLOYER" \
             --ledger_address "$LEDGER_ID" \
-            --token_address "$DEPLOYER"
+            --token_address "$TOKEN_ID"
 
           echo "✅ Contracts initialized with cross-references"
 
