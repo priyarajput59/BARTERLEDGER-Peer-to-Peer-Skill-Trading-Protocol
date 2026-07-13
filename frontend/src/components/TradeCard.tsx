@@ -14,8 +14,10 @@ export default function TradeCard({ trade, compact = false }: TradeCardProps) {
   const { pubKey, isConnected, addNotification, setTrades } = useBarterStore()
 
   const canAccept  = isConnected && trade.party_b === pubKey && trade.status === 'Proposed'
-  const canConfirm = isConnected && trade.status === 'Active' &&
-    (trade.party_a === pubKey || trade.party_b === pubKey)
+  const canConfirm = isConnected && (
+    (trade.party_a === pubKey && ['Active', 'ConfirmedB'].includes(trade.status)) ||
+    (trade.party_b === pubKey && ['Active', 'ConfirmedA'].includes(trade.status))
+  )
   const canDispute = isConnected && ['Active','ConfirmedA','ConfirmedB'].includes(trade.status) &&
     (trade.party_a === pubKey || trade.party_b === pubKey)
 
@@ -37,7 +39,7 @@ export default function TradeCard({ trade, compact = false }: TradeCardProps) {
     addNotification('info', `Confirming delivery for trade #${trade.id}…`)
     try {
       const hash = await confirmDelivery(pubKey, trade.id)
-      addNotification('success', `Delivery confirmed! TX: ${hash.slice(0,8)}... Both parties confirmed → trade complete.`)
+      addNotification('success', `Delivery confirmed! TX: ${hash.slice(0,8)}... State updated.`)
       const updatedTrades = await fetchUserTrades(pubKey)
       setTrades(updatedTrades)
     } catch (e: unknown) {
