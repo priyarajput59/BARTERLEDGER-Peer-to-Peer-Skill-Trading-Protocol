@@ -1,0 +1,12 @@
+target/
+Cargo.lock
+node_modules/
+dist/
+.env.local
+.env.*.local
+*.wasm
+!*.optimized.wasm
+.vscode/
+.idea/
+.DS_Store
+deployment/testnet.json
