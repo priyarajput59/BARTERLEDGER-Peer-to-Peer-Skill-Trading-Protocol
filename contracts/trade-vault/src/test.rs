@@ -30,22 +30,22 @@ struct TestSetup<'a> {
     party_b: Address,
 }
 
-fn setup<'a>(env: &'a Env) -> TestSetup<'a> {
+fn setup(env: &Env) -> TestSetup<'_> {
     env.mock_all_auths();
 
-    let admin = Address::generate(&env);
-    let ledger = Address::generate(&env); // mock ledger addr
-    let party_a = Address::generate(&env);
-    let party_b = Address::generate(&env);
+    let admin = Address::generate(env);
+    let ledger = Address::generate(env); // mock ledger addr
+    let party_a = Address::generate(env);
+    let party_b = Address::generate(env);
 
-    let (token_id, token, token_sac) = create_token(&env, &admin);
+    let (token_id, token, token_sac) = create_token(env, &admin);
 
     // Mint collateral to both parties
     token_sac.mint(&party_a, &10_000_0000000i128);
     token_sac.mint(&party_b, &10_000_0000000i128);
 
     let vault_id = env.register_contract(None, TradeVault);
-    let vault = TradeVaultClient::new(&env, &vault_id);
+    let vault = TradeVaultClient::new(env, &vault_id);
 
     vault.initialize(&admin, &ledger, &token_id);
 

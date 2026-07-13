@@ -3,14 +3,14 @@
 use super::*;
 use soroban_sdk::{testutils::Address as _, Address, Env};
 
-fn setup<'a>(env: &'a Env) -> (ReputationLedgerClient<'a>, Address, Address) {
+fn setup(env: &Env) -> (ReputationLedgerClient<'_>, Address, Address) {
     env.mock_all_auths();
 
     let contract_id = env.register_contract(None, ReputationLedger);
-    let client = ReputationLedgerClient::new(&env, &contract_id);
+    let client = ReputationLedgerClient::new(env, &contract_id);
 
-    let admin = Address::generate(&env);
-    let vault = Address::generate(&env);
+    let admin = Address::generate(env);
+    let vault = Address::generate(env);
 
     client.initialize(&admin, &vault);
     (client, admin, vault)
