@@ -3,9 +3,10 @@
 
 use super::*;
 use soroban_sdk::{
+    contract, contractimpl,
     testutils::{Address as _, MockAuth, MockAuthInvoke},
     token::{Client as TokenClient, StellarAssetClient},
-    Address, Env, String, contract, contractimpl,
+    Address, Env, String,
 };
 
 fn create_token<'a>(
