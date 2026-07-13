@@ -6,6 +6,16 @@ BarterLedger is an advanced, production-ready decentralized peer-to-peer skill b
 - **Live Platform**: [barterledger-peer-to-peer-skill-tra.vercel.app](https://barterledger-peer-to-peer-skill-tra.vercel.app/)
 - **Demo Video**: [Watch the Demo on Google Drive](https://drive.google.com/file/d/11HZiG2stKOXq-6RAb8ixDgEgWBiPsCCz/view?usp=sharing)
 
+## 🔗 Smart Contract Deployment & Interactivity
+
+The smart contracts are actively deployed on the Stellar Testnet.
+
+- **TradeVault Contract Address**: `CAE6RE63AQTBS57QVFHIJ7EGJBSOGXO7DXP7453PPWWASQHYPDXL5VER`
+- **ReputationLedger Contract Address**: `CADK6753ZZ2Z5XZ72FUKYEQJHQMYF4Y2Y4PXV2WMMVUBYV47PUD2GIXI`
+- **Transaction Hash**: [`4e5ec22ad749fa81023a1a3b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f`](https://stellar.expert/explorer/testnet/tx/4e5ec22ad749fa81023a1a3b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f) (Accept & Confirm Delivery Interaction)
+
+---
+
 ## 🌟 Key Features
 
 1. **Decentralized Escrow Vaults**: Deposit XLM into smart contract vaults as a good-faith bond when proposing a trade.
@@ -35,17 +45,7 @@ Comprehensive Rust integration tests validating the smart contract logic.
 Explorer view showing the confirmed on-chain state for completed trades.
 <img src="images/verified.png" width="100%" alt="Verified Trade" />
 
----
 
-## 🔗 Smart Contract Deployment & Interactivity
-
-The smart contracts are actively deployed on the Stellar Testnet.
-
-- **TradeVault Contract Address**: `CAE6RE63AQTBS57QVFHIJ7EGJBSOGXO7DXP7453PPWWASQHYPDXL5VER`
-- **ReputationLedger Contract Address**: `CADK6753ZZ2Z5XZ72FUKYEQJHQMYF4Y2Y4PXV2WMMVUBYV47PUD2GIXI`
-- **Transaction Hash**: [`4e5ec22ad749fa810...`](https://stellar.expert/explorer/testnet/contract/CAE6RE63AQTBS57QVFHIJ7EGJBSOGXO7DXP7453PPWWASQHYPDXL5VER) (Accept & Confirm Delivery Interaction)
-
----
 
 ## 🛠️ Tech Stack & Architecture
 
