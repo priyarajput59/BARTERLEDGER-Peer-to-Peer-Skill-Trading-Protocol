@@ -139,6 +139,11 @@ impl TradeVault {
         Self::push_user_trade(&env, &party_b, id);
         env.storage().instance().set(&NEXT_ID, &(id + 1));
 
+        let token_addr: Address = env.storage().instance().get(&TOKEN).unwrap();
+        let token = token::Client::new(&env, &token_addr);
+        let contract_addr = env.current_contract_address();
+        token.transfer(&party_a, &contract_addr, &collateral);
+
         env.events().publish(
             (EV_PROPOSED, party_a.clone()),
             (id, party_b.clone(), service_a),
@@ -166,8 +171,7 @@ impl TradeVault {
         let token = token::Client::new(&env, &token_addr);
         let contract_addr = env.current_contract_address();
 
-        // Both parties deposit collateral into the vault
-        token.transfer(&trade.party_a, &contract_addr, &trade.collateral);
+        // Party B deposits collateral (Party A already deposited in propose_trade)
         token.transfer(&party_b, &contract_addr, &trade.collateral);
 
         trade.status = TradeStatus::Active;
@@ -294,6 +298,11 @@ impl TradeVault {
         if trade.status != TradeStatus::Proposed {
             panic!("can only cancel Proposed trades");
         }
+
+        let token_addr: Address = env.storage().instance().get(&TOKEN).unwrap();
+        let token = token::Client::new(&env, &token_addr);
+        let contract_addr = env.current_contract_address();
+        token.transfer(&contract_addr, &trade.party_a, &trade.collateral);
 
         trade.status = TradeStatus::Cancelled;
         env.storage()
