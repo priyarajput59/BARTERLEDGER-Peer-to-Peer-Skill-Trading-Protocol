@@ -3,7 +3,7 @@ import { Loader2, FileText, Shield, CheckCircle, Info } from 'lucide-react'
 import { clsx } from 'clsx'
 import { useBarterStore } from '../lib/store'
 import { SKILL_TAGS, DEADLINE_OPTIONS } from '../lib/constants'
-import { truncAddr, formatXLM } from '../lib/mockData'
+import { truncAddr } from '../lib/mockData'
 
 export default function Propose() {
   const { isConnected, pubKey, addNotification, setTab } = useBarterStore()

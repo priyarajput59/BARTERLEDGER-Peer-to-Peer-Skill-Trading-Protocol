@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Search, TrendingUp, Users, CheckSquare, ArrowLeftRight } from 'lucide-react'
 import TradeCard from '../components/TradeCard'
 import RankBadge from '../components/RankBadge'
-import { MOCK_TRADES, MOCK_PROFILES, truncAddr, formatXLM } from '../lib/mockData'
+import { MOCK_TRADES, MOCK_PROFILES, truncAddr } from '../lib/mockData'
 import { useBarterStore } from '../lib/store'
 import type { TradeStatus } from '../lib/store'
 

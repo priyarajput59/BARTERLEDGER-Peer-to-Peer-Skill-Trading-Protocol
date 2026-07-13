@@ -3,7 +3,7 @@ import { Keypair } from '@stellar/stellar-sdk'
 import { Eye, EyeOff, Loader2, Copy, ExternalLink, TrendingUp, AlertTriangle, CheckCircle } from 'lucide-react'
 import { useBarterStore } from '../lib/store'
 import RankBadge from '../components/RankBadge'
-import { MOCK_PROFILES, truncAddr, formatDate } from '../lib/mockData'
+import { MOCK_PROFILES, formatDate } from '../lib/mockData'
 import { RANK_META } from '../lib/constants'
 
 export default function Profile() {
