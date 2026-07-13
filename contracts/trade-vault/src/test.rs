@@ -1,24 +1,26 @@
 #![cfg(test)]
+#![allow(clippy::inconsistent_digit_grouping)]
 
 use super::*;
 use soroban_sdk::{
-    testutils::{Address as _, MockAuth, MockAuthInvoke},
+    testutils::Address as _,
     token::{Client as TokenClient, StellarAssetClient},
-    Address, Env, IntoVal, String,
+    Address, Env, String,
 };
 
-fn create_token(env: &Env, admin: &Address) -> (Address, TokenClient, StellarAssetClient) {
+fn create_token(env: &Env, admin: &Address) -> (Address, TokenClient<'static>, StellarAssetClient<'static>) {
     let token_id = env.register_stellar_asset_contract(admin.clone());
     let token = TokenClient::new(env, &token_id);
     let token_sac = StellarAssetClient::new(env, &token_id);
     (token_id, token, token_sac)
 }
 
-struct TestSetup<'a> {
+#[allow(dead_code)]
+struct TestSetup {
     env: Env,
-    vault: TradeVaultClient<'a>,
-    token: TokenClient<'a>,
-    token_sac: StellarAssetClient<'a>,
+    vault: TradeVaultClient<'static>,
+    token: TokenClient<'static>,
+    token_sac: StellarAssetClient<'static>,
     admin: Address,
     ledger: Address,
     token_id: Address,
@@ -26,7 +28,7 @@ struct TestSetup<'a> {
     party_b: Address,
 }
 
-fn setup<'a>() -> TestSetup<'a> {
+fn setup() -> TestSetup {
     let env = Env::default();
     env.mock_all_auths();
 

@@ -27,7 +27,7 @@ fn test_initialize() {
 
 #[test]
 fn test_record_completion_creates_profiles() {
-    let (env, client, _, vault) = setup();
+    let (env, client, _, _vault) = setup();
     let trader_a = Address::generate(&env);
     let trader_b = Address::generate(&env);
 
