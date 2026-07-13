@@ -149,8 +149,10 @@ export async function fetchUserTrades(publicKey: string): Promise<Trade[]> {
       let statusStr = 'Proposed';
       if (typeof t.status === 'string') {
         statusStr = t.status;
-      } else if (t.status && typeof t.status === 'object') {
-        statusStr = t.status.tag || Object.keys(t.status)[0] || 'Proposed';
+      } else if (Array.isArray(t.status) && typeof t.status[0] === 'string') {
+        statusStr = t.status[0];
+      } else if (t.status && typeof t.status === 'object' && t.status.tag) {
+        statusStr = t.status.tag;
       }
       return {
         id: Number(t.id),
