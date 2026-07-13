@@ -180,7 +180,6 @@ fn test_full_trade_completion_returns_collateral() {
     t.vault.confirm_delivery(&t.party_b, &id);
     let trade = t.vault.get_trade(&id);
     assert_eq!(trade.status, TradeStatus::Completed);
-    assert!(trade.completed_at >= 0);
 
     // Collateral fully returned
     assert_eq!(t.token.balance(&t.party_a), bal_a_before);
