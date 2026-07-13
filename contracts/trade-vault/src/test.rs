@@ -8,10 +8,7 @@ use soroban_sdk::{
     Address, Env, String,
 };
 
-fn create_token(
-    env: &Env,
-    admin: &Address,
-) -> (Address, TokenClient<'static>, StellarAssetClient<'static>) {
+fn create_token<'a>(env: &'a Env, admin: &Address) -> (Address, TokenClient<'a>, StellarAssetClient<'a>) {
     let token_id = env.register_stellar_asset_contract(admin.clone());
     let token = TokenClient::new(env, &token_id);
     let token_sac = StellarAssetClient::new(env, &token_id);
@@ -19,11 +16,10 @@ fn create_token(
 }
 
 #[allow(dead_code)]
-struct TestSetup {
-    env: Env,
-    vault: TradeVaultClient<'static>,
-    token: TokenClient<'static>,
-    token_sac: StellarAssetClient<'static>,
+struct TestSetup<'a> {
+    vault: TradeVaultClient<'a>,
+    token: TokenClient<'a>,
+    token_sac: StellarAssetClient<'a>,
     admin: Address,
     ledger: Address,
     token_id: Address,
@@ -31,8 +27,7 @@ struct TestSetup {
     party_b: Address,
 }
 
-fn setup() -> TestSetup {
-    let env = Env::default();
+fn setup<'a>(env: &'a Env) -> TestSetup<'a> {
     env.mock_all_auths();
 
     let admin = Address::generate(&env);
@@ -52,7 +47,6 @@ fn setup() -> TestSetup {
     vault.initialize(&admin, &ledger, &token_id);
 
     TestSetup {
-        env,
         vault,
         token,
         token_sac,
@@ -66,7 +60,8 @@ fn setup() -> TestSetup {
 
 #[test]
 fn test_initialize() {
-    let t = setup();
+    let env = Env::default();
+    let t = setup(&env);
     assert_eq!(t.vault.get_admin(), t.admin);
     assert_eq!(t.vault.get_total_trades(), 0u64);
     assert_eq!(t.vault.get_active_count(), 0u32);
@@ -74,9 +69,10 @@ fn test_initialize() {
 
 #[test]
 fn test_propose_trade() {
-    let t = setup();
-    let svc_a = String::from_str(&t.env, "Logo design (3 concepts)");
-    let svc_b = String::from_str(&t.env, "React frontend for landing page");
+    let env = Env::default();
+    let t = setup(&env);
+    let svc_a = String::from_str(&env, "Logo design (3 concepts)");
+    let svc_b = String::from_str(&env, "React frontend for landing page");
 
     let id = t.vault.propose_trade(
         &t.party_a,
@@ -99,9 +95,10 @@ fn test_propose_trade() {
 
 #[test]
 fn test_accept_trade_locks_collateral() {
-    let t = setup();
-    let svc_a = String::from_str(&t.env, "Solidity audit");
-    let svc_b = String::from_str(&t.env, "Tokenomics design");
+    let env = Env::default();
+    let t = setup(&env);
+    let svc_a = String::from_str(&env, "Solidity audit");
+    let svc_b = String::from_str(&env, "Tokenomics design");
     let collateral = 500_0000000i128;
 
     let vault_addr = t.vault.address.clone();
@@ -131,9 +128,10 @@ fn test_accept_trade_locks_collateral() {
 
 #[test]
 fn test_full_trade_completion_returns_collateral() {
-    let t = setup();
-    let svc_a = String::from_str(&t.env, "Rust smart contract");
-    let svc_b = String::from_str(&t.env, "UI/UX design system");
+    let env = Env::default();
+    let t = setup(&env);
+    let svc_a = String::from_str(&env, "Rust smart contract");
+    let svc_b = String::from_str(&env, "UI/UX design system");
     let collateral = 200_0000000i128;
 
     let bal_a_before = t.token.balance(&t.party_a);
@@ -168,9 +166,10 @@ fn test_full_trade_completion_returns_collateral() {
 
 #[test]
 fn test_b_confirms_first_then_a() {
-    let t = setup();
-    let svc_a = String::from_str(&t.env, "Backend API");
-    let svc_b = String::from_str(&t.env, "Graphic assets");
+    let env = Env::default();
+    let t = setup(&env);
+    let svc_a = String::from_str(&env, "Backend API");
+    let svc_b = String::from_str(&env, "Graphic assets");
     let collateral = 100_0000000i128;
 
     let id = t.vault.propose_trade(
@@ -196,9 +195,10 @@ fn test_b_confirms_first_then_a() {
 
 #[test]
 fn test_cancel_proposed_trade() {
-    let t = setup();
-    let svc_a = String::from_str(&t.env, "Copy writing");
-    let svc_b = String::from_str(&t.env, "Photography");
+    let env = Env::default();
+    let t = setup(&env);
+    let svc_a = String::from_str(&env, "Copy writing");
+    let svc_b = String::from_str(&env, "Photography");
 
     let id = t.vault.propose_trade(
         &t.party_a,
@@ -216,10 +216,11 @@ fn test_cancel_proposed_trade() {
 
 #[test]
 fn test_raise_dispute() {
-    let t = setup();
-    let svc_a = String::from_str(&t.env, "SEO audit");
-    let svc_b = String::from_str(&t.env, "Social media content");
-    let reason = String::from_str(&t.env, "Deliverable not as agreed");
+    let env = Env::default();
+    let t = setup(&env);
+    let svc_a = String::from_str(&env, "SEO audit");
+    let svc_b = String::from_str(&env, "Social media content");
+    let reason = String::from_str(&env, "Deliverable not as agreed");
 
     let id = t.vault.propose_trade(
         &t.party_a,
@@ -238,9 +239,10 @@ fn test_raise_dispute() {
 
 #[test]
 fn test_user_trade_list() {
-    let t = setup();
-    let svc_a = String::from_str(&t.env, "A");
-    let svc_b = String::from_str(&t.env, "B");
+    let env = Env::default();
+    let t = setup(&env);
+    let svc_a = String::from_str(&env, "A");
+    let svc_b = String::from_str(&env, "B");
 
     t.vault.propose_trade(
         &t.party_a,
@@ -268,8 +270,9 @@ fn test_user_trade_list() {
 #[test]
 #[should_panic(expected = "cannot trade with yourself")]
 fn test_self_trade_fails() {
-    let t = setup();
-    let svc = String::from_str(&t.env, "Service");
+    let env = Env::default();
+    let t = setup(&env);
+    let svc = String::from_str(&env, "Service");
     t.vault.propose_trade(
         &t.party_a,
         &t.party_a,
@@ -283,9 +286,10 @@ fn test_self_trade_fails() {
 #[test]
 #[should_panic(expected = "collateral must be positive")]
 fn test_zero_collateral_fails() {
-    let t = setup();
-    let svc_a = String::from_str(&t.env, "A");
-    let svc_b = String::from_str(&t.env, "B");
+    let env = Env::default();
+    let t = setup(&env);
+    let svc_a = String::from_str(&env, "A");
+    let svc_b = String::from_str(&env, "B");
     t.vault
         .propose_trade(&t.party_a, &t.party_b, &svc_a, &svc_b, &0i128, &604800u64);
 }
@@ -293,10 +297,11 @@ fn test_zero_collateral_fails() {
 #[test]
 #[should_panic(expected = "not the counterparty")]
 fn test_wrong_party_cannot_accept() {
-    let t = setup();
-    let third = Address::generate(&t.env);
-    let svc_a = String::from_str(&t.env, "A");
-    let svc_b = String::from_str(&t.env, "B");
+    let env = Env::default();
+    let t = setup(&env);
+    let third = Address::generate(&env);
+    let svc_a = String::from_str(&env, "A");
+    let svc_b = String::from_str(&env, "B");
     let id = t.vault.propose_trade(
         &t.party_a,
         &t.party_b,

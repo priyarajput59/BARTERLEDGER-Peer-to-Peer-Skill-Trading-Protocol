@@ -3,8 +3,7 @@
 use super::*;
 use soroban_sdk::{testutils::Address as _, Address, Env};
 
-fn setup() -> (Env, ReputationLedgerClient<'static>, Address, Address) {
-    let env = Env::default();
+fn setup<'a>(env: &'a Env) -> (ReputationLedgerClient<'a>, Address, Address) {
     env.mock_all_auths();
 
     let contract_id = env.register_contract(None, ReputationLedger);
@@ -14,12 +13,13 @@ fn setup() -> (Env, ReputationLedgerClient<'static>, Address, Address) {
     let vault = Address::generate(&env);
 
     client.initialize(&admin, &vault);
-    (env, client, admin, vault)
+    (client, admin, vault)
 }
 
 #[test]
 fn test_initialize() {
-    let (_, client, admin, _) = setup();
+    let env = Env::default();
+    let (client, admin, _) = setup(&env);
     assert_eq!(client.get_admin(), admin);
     assert_eq!(client.get_total_completions(), 0u32);
     assert_eq!(client.get_total_traders(), 0u32);
@@ -27,7 +27,8 @@ fn test_initialize() {
 
 #[test]
 fn test_record_completion_creates_profiles() {
-    let (env, client, _, _vault) = setup();
+    let env = Env::default();
+    let (client, _, _vault) = setup(&env);
     let trader_a = Address::generate(&env);
     let trader_b = Address::generate(&env);
 
@@ -48,7 +49,8 @@ fn test_record_completion_creates_profiles() {
 
 #[test]
 fn test_streak_bonus_activates_at_5_trades() {
-    let (env, client, _, _) = setup();
+    let env = Env::default();
+    let (client, _, _) = setup(&env);
     let trader_a = Address::generate(&env);
     let trader_b = Address::generate(&env);
 
@@ -66,7 +68,8 @@ fn test_streak_bonus_activates_at_5_trades() {
 
 #[test]
 fn test_dispute_penalty() {
-    let (env, client, _, _) = setup();
+    let env = Env::default();
+    let (client, _, _) = setup(&env);
     let trader = Address::generate(&env);
     let other = Address::generate(&env);
 
@@ -84,7 +87,8 @@ fn test_dispute_penalty() {
 
 #[test]
 fn test_dispute_streak_increases_penalty() {
-    let (env, client, _, _) = setup();
+    let env = Env::default();
+    let (client, _, _) = setup(&env);
     let trader = Address::generate(&env);
     let other = Address::generate(&env);
 
@@ -106,7 +110,8 @@ fn test_dispute_streak_increases_penalty() {
 
 #[test]
 fn test_completion_resets_dispute_streak() {
-    let (env, client, _, _) = setup();
+    let env = Env::default();
+    let (client, _, _) = setup(&env);
     let trader_a = Address::generate(&env);
     let trader_b = Address::generate(&env);
 
@@ -140,7 +145,8 @@ fn test_rank_progression() {
 
 #[test]
 fn test_score_never_underflows() {
-    let (env, client, _, _) = setup();
+    let env = Env::default();
+    let (client, _, _) = setup(&env);
     let trader = Address::generate(&env);
 
     // Multiple disputes with zero score
@@ -154,7 +160,8 @@ fn test_score_never_underflows() {
 
 #[test]
 fn test_get_profile_returns_default_for_unknown() {
-    let (env, client, _, _) = setup();
+    let env = Env::default();
+    let (client, _, _) = setup(&env);
     let unknown = Address::generate(&env);
 
     let profile = client.get_profile(&unknown);
