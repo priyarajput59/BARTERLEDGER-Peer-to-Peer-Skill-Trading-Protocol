@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Eye, EyeOff, Loader2, Copy, ExternalLink, TrendingUp, AlertTriangle, CheckCircle } from 'lucide-react'
+import { Loader2, Copy, ExternalLink, TrendingUp, AlertTriangle, CheckCircle } from 'lucide-react'
 import { isConnected as isFreighterConnected, requestAccess, getAddress, signMessage } from '@stellar/freighter-api'
 import { useBarterStore } from '../lib/store'
 import RankBadge from '../components/RankBadge'
@@ -46,7 +46,7 @@ export default function Profile() {
       }
       setProfile(mock)
       addNotification('success', 'Wallet connected successfully!')
-    } catch (e) {
+    } catch {
       addNotification('error', 'Failed to connect wallet')
     } finally {
       setLoading(false)
