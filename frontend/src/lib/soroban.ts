@@ -3,7 +3,7 @@ import { signTransaction, isAllowed, setAllowed } from '@stellar/freighter-api';
 import { SOROBAN_RPC_URL, NETWORK_PASSPHRASE, TRADE_VAULT_ID } from './constants';
 import { Trade } from './store';
 
-const server = new StellarSdk.SorobanRpc.Server(SOROBAN_RPC_URL);
+const server = new StellarSdk.rpc.Server(SOROBAN_RPC_URL);
 
 export async function ensureFreighterAllowed() {
   if (await isAllowed()) return true;
@@ -131,11 +131,11 @@ export async function fetchUserTrades(publicKey: string): Promise<Trade[]> {
       .addOperation(operation).setTimeout(30).build();
 
     const sim = await server.simulateTransaction(tx);
-    if (StellarSdk.SorobanRpc.Api.isSimulationError(sim)) {
+    if (StellarSdk.rpc.Api.isSimulationError(sim)) {
       console.error(sim.error);
       return [];
     }
-    if (!StellarSdk.SorobanRpc.Api.isSimulationSuccess(sim) || !sim.result) {
+    if (!StellarSdk.rpc.Api.isSimulationSuccess(sim) || !sim.result) {
       return [];
     }
     
