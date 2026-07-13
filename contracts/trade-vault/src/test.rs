@@ -3,9 +3,9 @@
 
 use super::*;
 use soroban_sdk::{
-    testutils::Address as _,
+    testutils::{Address as _, MockAuth, MockAuthInvoke},
     token::{Client as TokenClient, StellarAssetClient},
-    Address, Env, String,
+    Address, Env, String, contract, contractimpl,
 };
 
 fn create_token<'a>(
@@ -16,6 +16,16 @@ fn create_token<'a>(
     let token = TokenClient::new(env, &token_id);
     let token_sac = StellarAssetClient::new(env, &token_id);
     (token_id, token, token_sac)
+}
+
+#[contract]
+pub struct MockLedger;
+
+#[contractimpl]
+impl MockLedger {
+    pub fn record_dispute(env: Env, party: Address, trade_id: u64) {
+        // Just mock it
+    }
 }
 
 #[allow(dead_code)]
@@ -34,7 +44,7 @@ fn setup(env: &Env) -> TestSetup<'_> {
     env.mock_all_auths();
 
     let admin = Address::generate(env);
-    let ledger = Address::generate(env); // mock ledger addr
+    let ledger = env.register_contract(None, MockLedger); // mock ledger addr
     let party_a = Address::generate(env);
     let party_b = Address::generate(env);
 
