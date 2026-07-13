@@ -4,6 +4,7 @@ import StatusBadge from './StatusBadge'
 import { truncAddr, formatXLM, deadlineLabel, formatDate } from '../lib/mockData'
 import { useBarterStore } from '../lib/store'
 import { acceptTrade, confirmDelivery, fetchUserTrades } from '../lib/soroban'
+import { TRADE_VAULT_ID } from '../lib/constants'
 
 interface TradeCardProps {
   trade: Trade
@@ -102,9 +103,19 @@ export default function TradeCard({ trade, compact = false }: TradeCardProps) {
           <span className="font-mono">{formatXLM(trade.collateral)} bond (each party)</span>
         </div>
         {trade.status === 'Completed' && (
-          <div className="flex items-center gap-1 text-[10px] font-mono" style={{ color: '#3FA07C' }}>
-            <CheckCircle size={10} />
-            Settled {formatDate(trade.completed_at)}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1 text-[10px] font-mono" style={{ color: '#3FA07C' }}>
+              <CheckCircle size={10} />
+              Settled {formatDate(trade.completed_at)}
+            </div>
+            <a 
+              href={`https://stellar.expert/explorer/testnet/contract/${TRADE_VAULT_ID}`} 
+              target="_blank" 
+              rel="noreferrer"
+              className="text-[10px] text-teal-400 hover:text-teal-300 hover:underline flex items-center gap-1 transition-colors"
+            >
+              Verify on Explorer ↗
+            </a>
           </div>
         )}
         {trade.status === 'Disputed' && (
