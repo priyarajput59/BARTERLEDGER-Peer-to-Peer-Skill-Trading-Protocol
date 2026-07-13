@@ -3,6 +3,7 @@ import type { Trade } from '../lib/store'
 import StatusBadge from './StatusBadge'
 import { truncAddr, formatXLM, deadlineLabel, formatDate } from '../lib/mockData'
 import { useBarterStore } from '../lib/store'
+import { acceptTrade, confirmDelivery } from '../lib/soroban'
 
 interface TradeCardProps {
   trade: Trade

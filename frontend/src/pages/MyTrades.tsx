@@ -1,9 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import TradeCard from '../components/TradeCard'
-import { MOCK_TRADES } from '../lib/mockData'
 import { useBarterStore } from '../lib/store'
 import type { TradeStatus } from '../lib/store'
 import { clsx } from 'clsx'
+import { fetchUserTrades } from '../lib/soroban'
 
 const TABS: { label: string; value: TradeStatus | 'all' }[] = [
   { label: 'All',       value: 'all'       },
@@ -14,8 +14,22 @@ const TABS: { label: string; value: TradeStatus | 'all' }[] = [
 ]
 
 export default function MyTrades() {
-  const { isConnected, setTab } = useBarterStore()
+  const { isConnected, pubKey, setTab, trades, setTrades } = useBarterStore()
   const [filter, setFilter] = useState<TradeStatus | 'all'>('all')
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (isConnected && pubKey) {
+      setLoading(true)
+      fetchUserTrades(pubKey).then(fetchedTrades => {
+        setTrades(fetchedTrades)
+        setLoading(false)
+      }).catch(err => {
+        console.error(err)
+        setLoading(false)
+      })
+    }
+  }, [isConnected, pubKey, setTrades])
 
   if (!isConnected) {
     return (
@@ -30,14 +44,14 @@ export default function MyTrades() {
     )
   }
 
-  const filtered = MOCK_TRADES.filter(t => filter === 'all' || t.status === filter)
+  const filtered = trades.filter(t => filter === 'all' || t.status === filter)
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 pb-20 pt-8">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="font-display text-3xl text-parchment">My Trades</h1>
-          <p className="text-sm text-muted mt-1">{MOCK_TRADES.length} trades on record</p>
+          <p className="text-sm text-muted mt-1">{trades.length} trades on record {loading && '(Loading...)'}</p>
         </div>
         <button onClick={() => setTab('propose')} className="btn-amber text-xs py-2">+ New Trade</button>
       </div>
@@ -55,7 +69,7 @@ export default function MyTrades() {
           >
             {t.label}
             <span className="ml-1.5 text-muted">
-              ({t.value === 'all' ? MOCK_TRADES.length : MOCK_TRADES.filter(x => x.status === t.value).length})
+              ({t.value === 'all' ? trades.length : trades.filter(x => x.status === t.value).length})
             </span>
           </button>
         ))}
