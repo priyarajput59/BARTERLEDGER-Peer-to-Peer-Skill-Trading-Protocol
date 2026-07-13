@@ -3,35 +3,35 @@
 use super::*;
 use soroban_sdk::{
     testutils::{Address as _, MockAuth, MockAuthInvoke},
-    Address, Env, IntoVal, String,
     token::{Client as TokenClient, StellarAssetClient},
+    Address, Env, IntoVal, String,
 };
 
 fn create_token(env: &Env, admin: &Address) -> (Address, TokenClient, StellarAssetClient) {
-    let token_id  = env.register_stellar_asset_contract(admin.clone());
-    let token     = TokenClient::new(env, &token_id);
+    let token_id = env.register_stellar_asset_contract(admin.clone());
+    let token = TokenClient::new(env, &token_id);
     let token_sac = StellarAssetClient::new(env, &token_id);
     (token_id, token, token_sac)
 }
 
 struct TestSetup<'a> {
-    env:       Env,
-    vault:     TradeVaultClient<'a>,
-    token:     TokenClient<'a>,
+    env: Env,
+    vault: TradeVaultClient<'a>,
+    token: TokenClient<'a>,
     token_sac: StellarAssetClient<'a>,
-    admin:     Address,
-    ledger:    Address,
-    token_id:  Address,
-    party_a:   Address,
-    party_b:   Address,
+    admin: Address,
+    ledger: Address,
+    token_id: Address,
+    party_a: Address,
+    party_b: Address,
 }
 
 fn setup<'a>() -> TestSetup<'a> {
     let env = Env::default();
     env.mock_all_auths();
 
-    let admin   = Address::generate(&env);
-    let ledger  = Address::generate(&env); // mock ledger addr
+    let admin = Address::generate(&env);
+    let ledger = Address::generate(&env); // mock ledger addr
     let party_a = Address::generate(&env);
     let party_b = Address::generate(&env);
 
@@ -42,11 +42,21 @@ fn setup<'a>() -> TestSetup<'a> {
     token_sac.mint(&party_b, &10_000_0000000i128);
 
     let vault_id = env.register_contract(None, TradeVault);
-    let vault    = TradeVaultClient::new(&env, &vault_id);
+    let vault = TradeVaultClient::new(&env, &vault_id);
 
     vault.initialize(&admin, &ledger, &token_id);
 
-    TestSetup { env, vault, token, token_sac, admin, ledger, token_id, party_a, party_b }
+    TestSetup {
+        env,
+        vault,
+        token,
+        token_sac,
+        admin,
+        ledger,
+        token_id,
+        party_a,
+        party_b,
+    }
 }
 
 #[test]
@@ -64,8 +74,10 @@ fn test_propose_trade() {
     let svc_b = String::from_str(&t.env, "React frontend for landing page");
 
     let id = t.vault.propose_trade(
-        &t.party_a, &t.party_b,
-        &svc_a, &svc_b,
+        &t.party_a,
+        &t.party_b,
+        &svc_a,
+        &svc_b,
         &1_000_0000000i128, // 1000 XLM collateral
         &604800u64,         // 7 days
     );
@@ -76,7 +88,7 @@ fn test_propose_trade() {
     let trade = t.vault.get_trade(&id);
     assert_eq!(trade.party_a, t.party_a);
     assert_eq!(trade.party_b, t.party_b);
-    assert_eq!(trade.status,  TradeStatus::Proposed);
+    assert_eq!(trade.status, TradeStatus::Proposed);
     assert_eq!(trade.collateral, 1_000_0000000i128);
 }
 
@@ -92,7 +104,12 @@ fn test_accept_trade_locks_collateral() {
     let bal_b_before = t.token.balance(&t.party_b);
 
     let id = t.vault.propose_trade(
-        &t.party_a, &t.party_b, &svc_a, &svc_b, &collateral, &604800u64
+        &t.party_a,
+        &t.party_b,
+        &svc_a,
+        &svc_b,
+        &collateral,
+        &604800u64,
     );
     t.vault.accept_trade(&t.party_b, &id);
 
@@ -118,7 +135,12 @@ fn test_full_trade_completion_returns_collateral() {
     let bal_b_before = t.token.balance(&t.party_b);
 
     let id = t.vault.propose_trade(
-        &t.party_a, &t.party_b, &svc_a, &svc_b, &collateral, &604800u64
+        &t.party_a,
+        &t.party_b,
+        &svc_a,
+        &svc_b,
+        &collateral,
+        &604800u64,
     );
     t.vault.accept_trade(&t.party_b, &id);
 
@@ -147,7 +169,12 @@ fn test_b_confirms_first_then_a() {
     let collateral = 100_0000000i128;
 
     let id = t.vault.propose_trade(
-        &t.party_a, &t.party_b, &svc_a, &svc_b, &collateral, &604800u64
+        &t.party_a,
+        &t.party_b,
+        &svc_a,
+        &svc_b,
+        &collateral,
+        &604800u64,
     );
     t.vault.accept_trade(&t.party_b, &id);
 
@@ -169,7 +196,12 @@ fn test_cancel_proposed_trade() {
     let svc_b = String::from_str(&t.env, "Photography");
 
     let id = t.vault.propose_trade(
-        &t.party_a, &t.party_b, &svc_a, &svc_b, &50_0000000i128, &604800u64
+        &t.party_a,
+        &t.party_b,
+        &svc_a,
+        &svc_b,
+        &50_0000000i128,
+        &604800u64,
     );
     t.vault.cancel_trade(&t.party_a, &id);
 
@@ -185,7 +217,12 @@ fn test_raise_dispute() {
     let reason = String::from_str(&t.env, "Deliverable not as agreed");
 
     let id = t.vault.propose_trade(
-        &t.party_a, &t.party_b, &svc_a, &svc_b, &100_0000000i128, &604800u64
+        &t.party_a,
+        &t.party_b,
+        &svc_a,
+        &svc_b,
+        &100_0000000i128,
+        &604800u64,
     );
     t.vault.accept_trade(&t.party_b, &id);
     t.vault.raise_dispute(&t.party_a, &id, &reason);
@@ -200,8 +237,22 @@ fn test_user_trade_list() {
     let svc_a = String::from_str(&t.env, "A");
     let svc_b = String::from_str(&t.env, "B");
 
-    t.vault.propose_trade(&t.party_a, &t.party_b, &svc_a, &svc_b, &10_0000000i128, &604800u64);
-    t.vault.propose_trade(&t.party_a, &t.party_b, &svc_a, &svc_b, &10_0000000i128, &604800u64);
+    t.vault.propose_trade(
+        &t.party_a,
+        &t.party_b,
+        &svc_a,
+        &svc_b,
+        &10_0000000i128,
+        &604800u64,
+    );
+    t.vault.propose_trade(
+        &t.party_a,
+        &t.party_b,
+        &svc_a,
+        &svc_b,
+        &10_0000000i128,
+        &604800u64,
+    );
 
     let trades_a = t.vault.get_user_trades(&t.party_a);
     let trades_b = t.vault.get_user_trades(&t.party_b);
@@ -214,7 +265,14 @@ fn test_user_trade_list() {
 fn test_self_trade_fails() {
     let t = setup();
     let svc = String::from_str(&t.env, "Service");
-    t.vault.propose_trade(&t.party_a, &t.party_a, &svc, &svc, &10_0000000i128, &604800u64);
+    t.vault.propose_trade(
+        &t.party_a,
+        &t.party_a,
+        &svc,
+        &svc,
+        &10_0000000i128,
+        &604800u64,
+    );
 }
 
 #[test]
@@ -223,7 +281,8 @@ fn test_zero_collateral_fails() {
     let t = setup();
     let svc_a = String::from_str(&t.env, "A");
     let svc_b = String::from_str(&t.env, "B");
-    t.vault.propose_trade(&t.party_a, &t.party_b, &svc_a, &svc_b, &0i128, &604800u64);
+    t.vault
+        .propose_trade(&t.party_a, &t.party_b, &svc_a, &svc_b, &0i128, &604800u64);
 }
 
 #[test]
@@ -234,7 +293,12 @@ fn test_wrong_party_cannot_accept() {
     let svc_a = String::from_str(&t.env, "A");
     let svc_b = String::from_str(&t.env, "B");
     let id = t.vault.propose_trade(
-        &t.party_a, &t.party_b, &svc_a, &svc_b, &10_0000000i128, &604800u64
+        &t.party_a,
+        &t.party_b,
+        &svc_a,
+        &svc_b,
+        &10_0000000i128,
+        &604800u64,
     );
     t.vault.accept_trade(&third, &id);
 }

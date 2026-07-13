@@ -8,7 +8,7 @@ fn setup() -> (Env, ReputationLedgerClient<'static>, Address, Address) {
     env.mock_all_auths();
 
     let contract_id = env.register_contract(None, ReputationLedger);
-    let client      = ReputationLedgerClient::new(&env, &contract_id);
+    let client = ReputationLedgerClient::new(&env, &contract_id);
 
     let admin = Address::generate(&env);
     let vault = Address::generate(&env);
@@ -67,8 +67,8 @@ fn test_streak_bonus_activates_at_5_trades() {
 #[test]
 fn test_dispute_penalty() {
     let (env, client, _, _) = setup();
-    let trader   = Address::generate(&env);
-    let other    = Address::generate(&env);
+    let trader = Address::generate(&env);
+    let other = Address::generate(&env);
 
     // First complete one trade to get 100 pts
     client.record_completion(&trader, &other, &0u64, &true);
@@ -78,18 +78,20 @@ fn test_dispute_penalty() {
     client.record_dispute(&trader, &1u64);
     let profile = client.get_profile(&trader);
     assert_eq!(profile.reputation_score, 70u64);
-    assert_eq!(profile.trades_disputed,  1u32);
-    assert_eq!(profile.dispute_streak,   1u32);
+    assert_eq!(profile.trades_disputed, 1u32);
+    assert_eq!(profile.dispute_streak, 1u32);
 }
 
 #[test]
 fn test_dispute_streak_increases_penalty() {
     let (env, client, _, _) = setup();
     let trader = Address::generate(&env);
-    let other  = Address::generate(&env);
+    let other = Address::generate(&env);
 
     // Build up some score first (5 trades = 525 pts)
-    for i in 0u64..5 { client.record_completion(&trader, &other, &i, &true); }
+    for i in 0u64..5 {
+        client.record_completion(&trader, &other, &i, &true);
+    }
 
     // 3 consecutive disputes: −30, −60, −90
     client.record_dispute(&trader, &10u64);
@@ -99,7 +101,7 @@ fn test_dispute_streak_increases_penalty() {
     let profile = client.get_profile(&trader);
     // 525 − 30 − 60 − 90 = 345
     assert_eq!(profile.reputation_score, 345u64);
-    assert_eq!(profile.dispute_streak,   3u32);
+    assert_eq!(profile.dispute_streak, 3u32);
 }
 
 #[test]
@@ -119,15 +121,21 @@ fn test_completion_resets_dispute_streak() {
 
 #[test]
 fn test_rank_progression() {
-    assert_eq!(ReputationLedger::score_to_rank(0),    TraderRank::Newcomer);
-    assert_eq!(ReputationLedger::score_to_rank(99),   TraderRank::Newcomer);
-    assert_eq!(ReputationLedger::score_to_rank(100),  TraderRank::Apprentice);
-    assert_eq!(ReputationLedger::score_to_rank(299),  TraderRank::Apprentice);
-    assert_eq!(ReputationLedger::score_to_rank(300),  TraderRank::Journeyman);
-    assert_eq!(ReputationLedger::score_to_rank(600),  TraderRank::Craftsman);
+    assert_eq!(ReputationLedger::score_to_rank(0), TraderRank::Newcomer);
+    assert_eq!(ReputationLedger::score_to_rank(99), TraderRank::Newcomer);
+    assert_eq!(ReputationLedger::score_to_rank(100), TraderRank::Apprentice);
+    assert_eq!(ReputationLedger::score_to_rank(299), TraderRank::Apprentice);
+    assert_eq!(ReputationLedger::score_to_rank(300), TraderRank::Journeyman);
+    assert_eq!(ReputationLedger::score_to_rank(600), TraderRank::Craftsman);
     assert_eq!(ReputationLedger::score_to_rank(1000), TraderRank::Artisan);
-    assert_eq!(ReputationLedger::score_to_rank(1800), TraderRank::GrandMaster);
-    assert_eq!(ReputationLedger::score_to_rank(9999), TraderRank::GrandMaster);
+    assert_eq!(
+        ReputationLedger::score_to_rank(1800),
+        TraderRank::GrandMaster
+    );
+    assert_eq!(
+        ReputationLedger::score_to_rank(9999),
+        TraderRank::GrandMaster
+    );
 }
 
 #[test]
@@ -136,7 +144,9 @@ fn test_score_never_underflows() {
     let trader = Address::generate(&env);
 
     // Multiple disputes with zero score
-    for i in 0u64..5 { client.record_dispute(&trader, &i); }
+    for i in 0u64..5 {
+        client.record_dispute(&trader, &i);
+    }
 
     let profile = client.get_profile(&trader);
     assert_eq!(profile.reputation_score, 0u64); // saturating_sub prevents underflow
