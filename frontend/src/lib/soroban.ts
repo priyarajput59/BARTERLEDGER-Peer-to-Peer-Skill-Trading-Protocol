@@ -127,7 +127,7 @@ export async function fetchUserTrades(publicKey: string): Promise<Trade[]> {
     ];
 
     const operation = contract.call('get_user_trades', ...args);
-    let tx = new StellarSdk.TransactionBuilder(account, { fee: '100', networkPassphrase: NETWORK_PASSPHRASE })
+    const tx = new StellarSdk.TransactionBuilder(account, { fee: '100', networkPassphrase: NETWORK_PASSPHRASE })
       .addOperation(operation).setTimeout(30).build();
 
     const sim = await server.simulateTransaction(tx);
@@ -144,7 +144,7 @@ export async function fetchUserTrades(publicKey: string): Promise<Trade[]> {
 
     const tradesVec = StellarSdk.scValToNative(resultVal);
     
-    return tradesVec.map((t: any) => {
+    return tradesVec.map((t: Record<string, unknown>) => {
       let statusStr = 'Proposed';
       if (t.status && t.status.tag) {
         statusStr = t.status.tag; // This extracts the Enum tag Name

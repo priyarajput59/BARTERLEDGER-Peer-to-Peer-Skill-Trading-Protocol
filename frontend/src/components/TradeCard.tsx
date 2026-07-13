@@ -20,15 +20,25 @@ export default function TradeCard({ trade, compact = false }: TradeCardProps) {
     (trade.party_a === pubKey || trade.party_b === pubKey)
 
   const handleAccept = async () => {
+    if (!pubKey) return
     addNotification('info', `Accepting trade #${trade.id} and locking collateral…`)
-    await new Promise(r => setTimeout(r, 1500))
-    addNotification('success', `Trade #${trade.id} accepted! Collateral of ${formatXLM(trade.collateral)} locked on-chain.`)
+    try {
+      await acceptTrade(pubKey, trade.id)
+      addNotification('success', `Trade #${trade.id} accepted! Collateral of ${formatXLM(trade.collateral)} locked on-chain.`)
+    } catch (e: unknown) {
+      addNotification('error', `Failed to accept: ${(e as Error).message}`)
+    }
   }
 
   const handleConfirm = async () => {
+    if (!pubKey) return
     addNotification('info', `Confirming delivery for trade #${trade.id}…`)
-    await new Promise(r => setTimeout(r, 1200))
-    addNotification('success', `Delivery confirmed! Both parties confirmed → trade will complete.`)
+    try {
+      await confirmDelivery(pubKey, trade.id)
+      addNotification('success', `Delivery confirmed! Both parties confirmed → trade will complete.`)
+    } catch (e: unknown) {
+      addNotification('error', `Failed to confirm: ${(e as Error).message}`)
+    }
   }
 
   const handleDispute = async () => {

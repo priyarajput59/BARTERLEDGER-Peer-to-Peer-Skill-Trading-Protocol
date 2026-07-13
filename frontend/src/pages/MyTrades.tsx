@@ -19,16 +19,23 @@ export default function MyTrades() {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
+    let mounted = true
     if (isConnected && pubKey) {
-      setLoading(true)
-      fetchUserTrades(pubKey).then(fetchedTrades => {
-        setTrades(fetchedTrades)
-        setLoading(false)
-      }).catch(err => {
-        console.error(err)
-        setLoading(false)
-      })
+      const load = async () => {
+        try {
+          const fetchedTrades = await fetchUserTrades(pubKey)
+          if (mounted) {
+            setTrades(fetchedTrades)
+            setLoading(false)
+          }
+        } catch (err) {
+          console.error(err)
+          if (mounted) setLoading(false)
+        }
+      }
+      load()
     }
+    return () => { mounted = false }
   }, [isConnected, pubKey, setTrades])
 
   if (!isConnected) {
