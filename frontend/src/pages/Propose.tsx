@@ -65,8 +65,10 @@ export default function Propose() {
           </p>
           <div className="space-y-2 text-left mb-6">
             <div className="ledger-card p-3">
-              <div className="eyebrow mb-1">Transaction Hash</div>
-              <div className="font-mono text-xs text-teal break-all">{txHash}</div>
+              <div className="eyebrow mb-1">Transaction Verified on Stellar Testnet</div>
+              <a href={`https://stellar.expert/explorer/testnet/tx/${txHash}`} target="_blank" rel="noreferrer" className="font-mono text-[10px] text-teal break-all hover:underline">
+                🔗 View on Stellar Expert: {txHash}
+              </a>
             </div>
             <div className="ledger-card p-3 grid grid-cols-2 gap-4 text-xs">
               <div>

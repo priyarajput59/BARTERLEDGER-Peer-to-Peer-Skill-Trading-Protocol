@@ -23,8 +23,8 @@ export default function TradeCard({ trade, compact = false }: TradeCardProps) {
     if (!pubKey) return
     addNotification('info', `Accepting trade #${trade.id} and locking collateral…`)
     try {
-      await acceptTrade(pubKey, trade.id)
-      addNotification('success', `Trade #${trade.id} accepted! Collateral of ${formatXLM(trade.collateral)} locked on-chain.`)
+      const hash = await acceptTrade(pubKey, trade.id)
+      addNotification('success', `Trade #${trade.id} accepted! TX: ${hash.slice(0,8)}... Collateral locked.`)
     } catch (e: unknown) {
       addNotification('error', `Failed to accept: ${(e as Error).message}`)
     }
@@ -34,8 +34,8 @@ export default function TradeCard({ trade, compact = false }: TradeCardProps) {
     if (!pubKey) return
     addNotification('info', `Confirming delivery for trade #${trade.id}…`)
     try {
-      await confirmDelivery(pubKey, trade.id)
-      addNotification('success', `Delivery confirmed! Both parties confirmed → trade will complete.`)
+      const hash = await confirmDelivery(pubKey, trade.id)
+      addNotification('success', `Delivery confirmed! TX: ${hash.slice(0,8)}... Both parties confirmed → trade complete.`)
     } catch (e: unknown) {
       addNotification('error', `Failed to confirm: ${(e as Error).message}`)
     }
