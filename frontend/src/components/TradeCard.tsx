@@ -3,7 +3,7 @@ import type { Trade } from '../lib/store'
 import StatusBadge from './StatusBadge'
 import { truncAddr, formatXLM, deadlineLabel, formatDate } from '../lib/mockData'
 import { useBarterStore } from '../lib/store'
-import { acceptTrade, confirmDelivery } from '../lib/soroban'
+import { acceptTrade, confirmDelivery, fetchUserTrades } from '../lib/soroban'
 
 interface TradeCardProps {
   trade: Trade
@@ -11,7 +11,7 @@ interface TradeCardProps {
 }
 
 export default function TradeCard({ trade, compact = false }: TradeCardProps) {
-  const { pubKey, isConnected, addNotification } = useBarterStore()
+  const { pubKey, isConnected, addNotification, setTrades } = useBarterStore()
 
   const canAccept  = isConnected && trade.party_b === pubKey && trade.status === 'Proposed'
   const canConfirm = isConnected && trade.status === 'Active' &&
@@ -25,6 +25,8 @@ export default function TradeCard({ trade, compact = false }: TradeCardProps) {
     try {
       const hash = await acceptTrade(pubKey, trade.id)
       addNotification('success', `Trade #${trade.id} accepted! TX: ${hash.slice(0,8)}... Collateral locked.`)
+      const updatedTrades = await fetchUserTrades(pubKey)
+      setTrades(updatedTrades)
     } catch (e: unknown) {
       addNotification('error', `Failed to accept: ${(e as Error).message}`)
     }
@@ -36,6 +38,8 @@ export default function TradeCard({ trade, compact = false }: TradeCardProps) {
     try {
       const hash = await confirmDelivery(pubKey, trade.id)
       addNotification('success', `Delivery confirmed! TX: ${hash.slice(0,8)}... Both parties confirmed → trade complete.`)
+      const updatedTrades = await fetchUserTrades(pubKey)
+      setTrades(updatedTrades)
     } catch (e: unknown) {
       addNotification('error', `Failed to confirm: ${(e as Error).message}`)
     }

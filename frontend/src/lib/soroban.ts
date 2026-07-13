@@ -147,8 +147,10 @@ export async function fetchUserTrades(publicKey: string): Promise<Trade[]> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return tradesVec.map((t: any) => {
       let statusStr = 'Proposed';
-      if (t.status && t.status.tag) {
-        statusStr = t.status.tag; // This extracts the Enum tag Name
+      if (typeof t.status === 'string') {
+        statusStr = t.status;
+      } else if (t.status && typeof t.status === 'object') {
+        statusStr = t.status.tag || Object.keys(t.status)[0] || 'Proposed';
       }
       return {
         id: Number(t.id),
@@ -156,7 +158,7 @@ export async function fetchUserTrades(publicKey: string): Promise<Trade[]> {
         party_b: t.party_b,
         service_a: t.service_a,
         service_b: t.service_b,
-        collateral: Number(t.collateral) / 10000000,
+        collateral: Number(t.collateral),
         deadline: Number(t.deadline),
         status: statusStr,
         created_at: Number(t.created_at),
