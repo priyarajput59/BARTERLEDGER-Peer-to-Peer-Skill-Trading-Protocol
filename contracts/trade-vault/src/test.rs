@@ -4,7 +4,7 @@
 use super::*;
 use soroban_sdk::{
     contract, contractimpl,
-    testutils::{Address as _, MockAuth, MockAuthInvoke},
+    testutils::Address as _,
     token::{Client as TokenClient, StellarAssetClient},
     Address, Env, String,
 };
@@ -24,7 +24,7 @@ pub struct MockLedger;
 
 #[contractimpl]
 impl MockLedger {
-    pub fn record_dispute(env: Env, party: Address, trade_id: u64) {
+    pub fn record_dispute(_env: Env, _party: Address, _trade_id: u64) {
         // Just mock it
     }
 }
