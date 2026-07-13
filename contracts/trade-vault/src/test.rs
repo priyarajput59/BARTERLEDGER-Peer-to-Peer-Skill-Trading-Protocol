@@ -290,7 +290,3 @@ fn test_user_trade_list() {
     assert_eq!(trades_a.len(), 2);
     assert_eq!(trades_b.len(), 2);
 }
-
-
-
-
