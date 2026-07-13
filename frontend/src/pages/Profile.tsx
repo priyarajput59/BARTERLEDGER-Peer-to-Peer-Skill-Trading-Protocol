@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { Keypair } from '@stellar/stellar-sdk'
 import { Eye, EyeOff, Loader2, Copy, ExternalLink, TrendingUp, AlertTriangle, CheckCircle } from 'lucide-react'
+import { isConnected as isFreighterConnected, requestAccess, getAddress, signMessage } from '@stellar/freighter-api'
 import { useBarterStore } from '../lib/store'
 import RankBadge from '../components/RankBadge'
 import { MOCK_PROFILES, formatDate } from '../lib/mockData'
@@ -8,33 +8,48 @@ import { RANK_META } from '../lib/constants'
 
 export default function Profile() {
   const { isConnected, pubKey, setWallet, disconnect, setProfile, addNotification } = useBarterStore()
-  const [secretInput, setSecretInput] = useState('')
-  const [showSecret, setShowSecret]   = useState(false)
   const [loading, setLoading]         = useState(false)
 
   const handleConnect = async () => {
     setLoading(true)
     try {
-      let kp: Keypair
-      if (secretInput.trim()) {
-        kp = Keypair.fromSecret(secretInput.trim())
-      } else {
-        kp = Keypair.random()
-        addNotification('info', 'New testnet keypair generated. Save your secret key!')
+      const installed = await isFreighterConnected()
+      if (!installed) {
+        addNotification('error', 'Freighter wallet is not installed. Please install the browser extension.')
+        return
       }
-      setWallet(kp.publicKey(), kp.secret())
-      // Load mock profile
-      const mock = MOCK_PROFILES.find(p => p.trader === kp.publicKey()) || {
-        trader: kp.publicKey(), reputation_score: 0, rank: 'Newcomer',
+
+      const accessObj = await requestAccess()
+      if (accessObj.error) {
+        addNotification('error', 'Connection request denied')
+        return
+      }
+
+      const addressObj = await getAddress()
+      if (addressObj.error || !addressObj.address) {
+        addNotification('error', 'Could not retrieve wallet address')
+        return
+      }
+
+      const pk = addressObj.address
+      const sigObj = await signMessage('Log in to BarterLedger')
+      if (sigObj.error) {
+        addNotification('error', 'Signature request denied')
+        return
+      }
+
+      setWallet(pk)
+      
+      const mock = MOCK_PROFILES.find(p => p.trader === pk) || {
+        trader: pk, reputation_score: 0, rank: 'Newcomer',
         trades_completed: 0, trades_disputed: 0, dispute_streak: 0, last_activity: Date.now() / 1000,
       }
       setProfile(mock)
-      addNotification('success', 'Wallet connected!')
-    } catch {
-      addNotification('error', 'Invalid secret key')
+      addNotification('success', 'Wallet connected successfully!')
+    } catch (e) {
+      addNotification('error', 'Failed to connect wallet')
     } finally {
       setLoading(false)
-      setSecretInput('')
     }
   }
 
@@ -48,30 +63,12 @@ export default function Profile() {
             <span className="font-display text-2xl text-amber-lt">⬡</span>
           </div>
           <h1 className="font-display text-3xl text-parchment mb-2">Connect Wallet</h1>
-          <p className="text-sm text-muted">Enter your Stellar secret key or generate a fresh testnet keypair.</p>
+          <p className="text-sm text-muted">Connect your Freighter wallet to start trading on BarterLedger.</p>
         </div>
 
         <div className="contract-card p-6 space-y-4">
-          <div>
-            <label className="eyebrow block mb-2">Secret Key</label>
-            <div className="relative">
-              <input
-                type={showSecret ? 'text' : 'password'}
-                className="ledger-input pr-10 font-mono text-xs"
-                placeholder="S… (leave empty to generate)"
-                value={secretInput}
-                onChange={e => setSecretInput(e.target.value)}
-              />
-              <button onClick={() => setShowSecret(s => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-parchment">
-                {showSecret ? <EyeOff size={14} /> : <Eye size={14} />}
-              </button>
-            </div>
-          </div>
-          <div className="text-xs text-muted bg-black/20 rounded-sm p-3 border border-white/[0.05]">
-            ⚠ Testnet only. Never enter a mainnet secret key here.
-          </div>
           <button onClick={handleConnect} disabled={loading} className="btn-teal w-full flex items-center justify-center gap-2">
-            {loading ? <><Loader2 size={14} className="animate-spin" /> Connecting…</> : secretInput ? 'Connect Wallet' : 'Generate & Connect'}
+            {loading ? <><Loader2 size={14} className="animate-spin" /> Waiting for Freighter…</> : 'Connect Freighter'}
           </button>
         </div>
       </div>

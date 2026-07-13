@@ -37,9 +37,8 @@ interface Notification {
 interface BarterStore {
   // Wallet
   pubKey: string
-  secretKey: string
   isConnected: boolean
-  setWallet: (pub: string, sec: string) => void
+  setWallet: (pub: string) => void
   disconnect: () => void
 
   // Trades
@@ -62,9 +61,9 @@ interface BarterStore {
 }
 
 export const useBarterStore = create<BarterStore>((set, get) => ({
-  pubKey: '', secretKey: '', isConnected: false,
-  setWallet: (pub, sec) => set({ pubKey: pub, secretKey: sec, isConnected: true }),
-  disconnect: () => set({ pubKey: '', secretKey: '', isConnected: false, profile: null, trades: [] }),
+  pubKey: '', isConnected: false,
+  setWallet: (pub) => set({ pubKey: pub, isConnected: true }),
+  disconnect: () => set({ pubKey: '', isConnected: false, profile: null, trades: [] }),
 
   trades: [],
   setTrades: (t) => set({ trades: t }),
