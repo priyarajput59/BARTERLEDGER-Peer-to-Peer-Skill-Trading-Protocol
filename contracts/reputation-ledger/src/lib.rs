@@ -1,8 +1,6 @@
 #![no_std]
 
-use soroban_sdk::{
-    contract, contractimpl, contracttype, log, symbol_short, Address, Env, Symbol,
-};
+use soroban_sdk::{contract, contractimpl, contracttype, log, symbol_short, Address, Env, Symbol};
 
 // ─── Storage Keys ────────────────────────────────────────────────────────────
 
