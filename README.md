@@ -12,7 +12,7 @@ The smart contracts are actively deployed on the Stellar Testnet.
 
 - **TradeVault Contract Address**: `CAE6RE63AQTBS57QVFHIJ7EGJBSOGXO7DXP7453PPWWASQHYPDXL5VER`
 - **ReputationLedger Contract Address**: `CADK6753ZZ2Z5XZ72FUKYEQJHQMYF4Y2Y4PXV2WMMVUBYV47PUD2GIXI`
-- **Transaction Hash**: [`4e5ec22ad749fa81023a1a3b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f`](https://stellar.expert/explorer/testnet/tx/4e5ec22ad749fa81023a1a3b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f) (Accept & Confirm Delivery Interaction)
+- **Transaction Hash**: [`4e5ec22ad749fa81072a4643d55dedd7f481d3c76fb71ade3acfcb332a94b3ab`](https://stellar.expert/explorer/testnet/tx/4e5ec22ad749fa81072a4643d55dedd7f481d3c76fb71ade3acfcb332a94b3ab) (Accept & Confirm Delivery Interaction)
 
 ---
 
