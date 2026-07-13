@@ -144,7 +144,8 @@ export async function fetchUserTrades(publicKey: string): Promise<Trade[]> {
 
     const tradesVec = StellarSdk.scValToNative(resultVal);
     
-    return tradesVec.map((t: Record<string, unknown>) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return tradesVec.map((t: any) => {
       let statusStr = 'Proposed';
       if (t.status && t.status.tag) {
         statusStr = t.status.tag; // This extracts the Enum tag Name

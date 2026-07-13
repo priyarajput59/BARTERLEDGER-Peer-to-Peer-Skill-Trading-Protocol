@@ -4,7 +4,7 @@ import { clsx } from 'clsx'
 import { useBarterStore } from '../lib/store'
 import { SKILL_TAGS, DEADLINE_OPTIONS } from '../lib/constants'
 import { truncAddr } from '../lib/mockData'
-
+import { proposeTrade } from '../lib/soroban'
 export default function Propose() {
   const { isConnected, pubKey, addNotification, setTab } = useBarterStore()
 
@@ -33,8 +33,15 @@ export default function Propose() {
 
     setSubmitting(true)
     try {
-      await new Promise(r => setTimeout(r, 2000))
-      const hash = Array.from({ length: 64 }, () => '0123456789abcdef'[Math.floor(Math.random() * 16)]).join('')
+      if (!pubKey) throw new Error('Wallet not connected');
+      const hash = await proposeTrade(
+        pubKey,
+        form.counterparty,
+        form.serviceA,
+        form.serviceB,
+        form.collateral.toString(),
+        form.deadline
+      );
       setTxHash(hash)
       addNotification('success', `Trade proposal submitted! TX: ${hash.slice(0,12)}…`)
     } catch (e) {
