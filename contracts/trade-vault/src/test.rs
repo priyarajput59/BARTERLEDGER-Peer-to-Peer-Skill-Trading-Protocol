@@ -27,6 +27,16 @@ impl MockLedger {
     pub fn record_dispute(_env: Env, _party: Address, _trade_id: u64) {
         // Just mock it
     }
+
+    pub fn record_completion(
+        _env: Env,
+        _party_a: Address,
+        _party_b: Address,
+        _trade_id: u64,
+        _successful: bool,
+    ) {
+        // Just mock it
+    }
 }
 
 #[allow(dead_code)]
